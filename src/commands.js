@@ -1,24 +1,30 @@
-// Your bot's behaviour. Add commands here; grammY's docs (grammy.dev) cover
-// keyboards, sessions, files, inline queries and everything else.
-
-import { InlineKeyboard } from "grammy"
-
 export function registerCommands(bot) {
   bot.command("start", (ctx) =>
-    ctx.reply(`Hi ${ctx.from?.first_name ?? "there"}. I am alive and hosted on FadeHost. Send /help to see what I can do.`, {
-      reply_markup: new InlineKeyboard().text("Ping me", "ping"),
-    }),
+    ctx.reply("🛡 APK Delete Bot ishga tushdi!")
   )
 
   bot.command("help", (ctx) =>
-    ctx.reply(["Commands:", "/start  say hello", "/help   this list", "/ping   check I am awake", "/id     show chat and user ids", "", "Send me any text and I echo it back."].join("\n")),
+    ctx.reply("Men guruhdagi APK fayllarni avtomatik o‘chiraman.")
   )
 
-  bot.command("ping", (ctx) => ctx.reply("pong"))
+  const blockedExtensions = [".apk", ".xapk", ".apks", ".aab"]
 
-  bot.command("id", (ctx) => ctx.reply(`Chat id: ${ctx.chat.id}\nYour id: ${ctx.from?.id ?? "unknown"}`))
+  bot.on("message:document", async (ctx) => {
+    const file = ctx.message.document
+    const filename = file.file_name || ""
 
-  bot.callbackQuery("ping", (ctx) => ctx.answerCallbackQuery({ text: "pong" }))
+    const isBlocked = blockedExtensions.some(ext =>
+      filename.toLowerCase().endsWith(ext)
+    )
 
-  bot.on("message:text", (ctx) => ctx.reply(ctx.message.text))
+    if (isBlocked) {
+      try {
+        await ctx.deleteMessage()
+        console.log(`[DELETED] ${filename}`)
+      } catch (error) {
+        console.error("Delete error:", error)
+      }
+    }
+  })
 }
+
